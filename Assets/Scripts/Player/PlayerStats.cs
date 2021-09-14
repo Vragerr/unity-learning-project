@@ -41,6 +41,9 @@ public class PlayerStats : MonoBehaviour
     void HealHP()
     {
         health += 20;
-        controller.isDied = false;
+    }
+    void MakeDead()
+    {
+
     }
 }

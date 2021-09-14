@@ -105,6 +105,7 @@ namespace Enemy {
                 attackCollider.GetComponent<PlayerStats>().TakeDamage();
                 timerAttack = 0f;
                 }
+                mustPatrol = true;
             }
         }        
     }
