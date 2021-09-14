@@ -43,4 +43,8 @@ public class PlayerStats : MonoBehaviour
         health += 20;
         controller.isDied = false;
     }
+    void MakeDead()
+    {
+
+    }
 }

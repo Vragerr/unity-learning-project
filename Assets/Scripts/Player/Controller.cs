@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class Controller : MonoBehaviour
 {   
-    enum State
+    public enum State
     {
         Walking,
         Died,
         Knockback,
         Jumping,
-        Idle
+        Idle,
+        Falling,
+        Attack
     }
-    private State state;
+    public State state;
     Rigidbody2D rb;
     PlayerStats stats;
     private Animator animator;
@@ -35,6 +37,8 @@ public class Controller : MonoBehaviour
     {
         isGrounded = Physics2D.OverlapCircle(GroundCheck.position, checkRadius, Ground);
         animator.SetBool("Grounded", isGrounded);
+        state = State.Falling;
+        
     }
     void Start()
     {
@@ -179,7 +183,7 @@ public class Controller : MonoBehaviour
             animator.SetTrigger("Attack"+1);
             timerAttack = 0f;
         }
-        else if (isCanAttack && state==State.Jumping)
+        else if (isCanAttack && !isGrounded)
         {
             animator.SetTrigger("Attack" + 3);
             timerAttack = 0f;
