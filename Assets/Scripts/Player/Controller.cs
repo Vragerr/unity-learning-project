@@ -213,7 +213,7 @@ public class Controller : MonoBehaviour
             if (dashTimeLeft > 0)
             {
                 canMove = false;
-                rb.velocity = new Vector2(dashSpeed * movementDirection, rb.velocity.y);
+                rb.velocity = new Vector2(dashSpeed * movementDirection,0);
                 dashTimeLeft -= Time.deltaTime;
 
                 if (Mathf.Abs(transform.position.x - lastImageXpos) > distanceBetweenImages)
