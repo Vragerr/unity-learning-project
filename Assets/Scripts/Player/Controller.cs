@@ -41,7 +41,7 @@ public class Controller : MonoBehaviour
     public int amountJump;
 
     private bool isCanAttack = true;
-    private bool isGrounded;   // is on Ground
+    public bool isGrounded;   // is on Ground
     private bool canMove;
     private bool isDashing;
 
@@ -71,9 +71,7 @@ public class Controller : MonoBehaviour
     void FixedUpdate()
     {
         if (!isDied)
-        {
-            if (timerAttack < 3f)
-                timerAttack += Time.deltaTime * stats.AttackSpeed;
+        {         
             ApplyMovement();
             AnimationsControl();
             //Die
@@ -131,7 +129,7 @@ public class Controller : MonoBehaviour
         }
         if (Input.GetButtonDown("Attack"))
         {
-            Attack();
+           // Attack();
         }
 
     }
@@ -206,6 +204,10 @@ public class Controller : MonoBehaviour
             amountJumpsLeft = amountJump;
         }
     }
+    public int GetFacingDirrection()
+    {
+        return (int)movementDirection;
+    }
     private void CheckDash()
     {
         if (isDashing)
@@ -231,25 +233,6 @@ public class Controller : MonoBehaviour
     }
     #endregion
     #region Attack
-    public void Attack()
-    {
-        isCanAttack = timerAttack > 1f ? true : false;
-        if (isCanAttack)
-        {
-            if (state == State.Idle)
-            {
-                animator.SetTrigger("Attack" + 1);
-            }
-            else if (state == State.Walking)
-            {
-                animator.SetTrigger("Attack" + 2);
-            }
-            else if (!isGrounded)
-            {
-                animator.SetTrigger("Attack" + 3);
-            }
-            timerAttack = 0f;
-        }
-    }
+
     #endregion
 }

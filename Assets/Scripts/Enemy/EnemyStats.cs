@@ -26,9 +26,7 @@ namespace Enemy
         {
             if (this.hitPoints > 20)
                 this.hitPoints -= 20;         
-        }
-        
-
+        }    
     }
 
 }

@@ -13,24 +13,35 @@ public class PlayerCombatController : MonoBehaviour
     [SerializeField]
     private LayerMask damageableLayers;
 
-    private bool gotInput,isAttacking;
+    private bool gotInput,isAttacking, isCanAttack;
 
     private float lastInputTime=Mathf.NegativeInfinity;
+    private float timerAttack;
+    private string state;
 
     private Animator animator;
+    private PlayerStats stats;
+    private Controller controller;
 
     private void Start()
     {
+        controller = GetComponent<Controller>();
+        stats = GetComponent<PlayerStats>();
         animator = GetComponent<Animator>();
     }
     private void Update()
     {
-        checkCombatInput();
-        CheckAttacks();
+        state = controller.state.ToString();
+        if (!controller.isDied) {
+            if (timerAttack < 3f)
+                timerAttack += Time.deltaTime * stats.AttackSpeed;
+            checkCombatInput();
+            CheckAttacks();
+        }
     }
     private void checkCombatInput()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetButtonDown("Attack"))
         {
             if (combatEnabled)
             {
@@ -43,11 +54,25 @@ public class PlayerCombatController : MonoBehaviour
     {
         if (gotInput)
         {
-            if (!isAttacking)
-            {
+            isCanAttack = timerAttack > 1f ? true : false;
+            if (!isAttacking && isCanAttack)
+            {              
+                timerAttack = 0f;
                 gotInput = false;
-                isAttacking = true;
-
+                isAttacking = true;             
+                if (state == "Idle")
+                {
+                    animator.SetTrigger("Attack" + 1);
+                }
+                else if (state == "Walking")
+                {
+                    animator.SetTrigger("Attack" + 2);
+                }
+                else if (!controller.isGrounded)
+                {
+                    animator.SetTrigger("Attack" + 3);
+                }
+                FinishAttack();
             }
         }
         if (Time.time >= lastInputTime + inputTimer)
@@ -57,14 +82,15 @@ public class PlayerCombatController : MonoBehaviour
     }
     private void CheckAttackHitBox()
     {
-        Collider2D[] detectedObjects = Physics2D.OverlapCircleAll(attackHitBoxPos.position,attackRadius,damageableLayers);
+       Collider2D[] detectedObjects = Physics2D.OverlapCircleAll(attackHitBoxPos.position,attackRadius,damageableLayers);
         foreach (Collider2D collider in detectedObjects)
         {
-            collider.transform.parent.SendMessage("Damage",attackDamage);
+            collider.transform.SendMessage("Damage",attackDamage);
         }
     }
     private void FinishAttack()
     {
+        CheckAttackHitBox();
         isAttacking = false;
     }
     private void OnDrawGizmos()

@@ -21,8 +21,8 @@ TagManager:
   - Platform
   - Foreground
   - Background
-  - 
-  - 
+  - Dead
+  - Enemy
   - 
   - 
   - 
@@ -54,11 +54,11 @@ TagManager:
   - name: Platforms
     uniqueID: 384171239
     locked: 0
+  - name: Enemy
+    uniqueID: 1468090105
+    locked: 0
   - name: Player
     uniqueID: 3945788105
-    locked: 0
-  - name: Mobs
-    uniqueID: 1468090105
     locked: 0
   - name: Foreground
     uniqueID: 4088181425

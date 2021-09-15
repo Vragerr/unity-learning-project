@@ -6,14 +6,17 @@ using UnityEngine.AI;
 namespace Enemy { 
     public class EnemyAI : MonoBehaviour
     {
-        //For future animationsCoreController
-        private enum State
-        {
-            Walking,
-            Knockback,
-            Dead
-        }
-        private State currentState;
+        private float attackSpeed, attackColdown,knockbackStart;
+        [SerializeField]
+        private int MaxHitpoints;
+        [SerializeField]
+        private bool applyKnockback;
+        [SerializeField]
+        private float knockbackSpeedX, knockbackSpeedY,knockbackDuration;
+
+        private int currentHealth,playerFacingDirection;
+
+
         public Collider2D
             bodyCollider,        //body collider
             AttackCollider,      // Attack checkPlayer collider
@@ -27,37 +30,48 @@ namespace Enemy {
         public Rigidbody2D rb; 
         public LayerMask groundLayer;
         public Animator animator;
-        //stats controll
-        EnemyStats EnemyStat = new EnemyStats();
+        private Controller playerController;
+
         public float 
-            walkSpeed,
-            timerAttack; 
-        private bool 
-            mustPatrol, //Patrol Mod on/off
-            mustTurn;   
+            moveSpeed,
+            timerAttack;
+        private bool mustPatrol; //Patrol Mod on/off
+        private bool mustTurn,knockback,isDead,playerOnLeft,isAttack;
+
         void Start()
         {
+            attackSpeed = 5f;
+            moveSpeed = 120f;
+            attackColdown = 1f;
+            MaxHitpoints = 100;
+            currentHealth = MaxHitpoints;
             timerAttack = 1f;
             mustPatrol = true;
-            walkSpeed *= EnemyStat.moveSpeed;
            // target = PlayerManager.instance.player.transform;
             AttackCollider = GetComponent<Collider2D>();
             animator = GetComponent<Animator>();
             SightCollider = GetComponent<Collider2D>();           
             Physics2D.IgnoreCollision(colliderEnemyGround, colliderCharacter);
             Physics2D.IgnoreCollision(bodyCollider, colliderCharacter);
+            playerController = GameObject.Find("Player").GetComponent<Controller>();
         }
 
         void Update()
         {
-            if (timerAttack < 3)
-                timerAttack += Time.deltaTime*EnemyStat.attackColdown;                     
-                OnTriggerEnter2D(AttackCollider);                    
+            if (!isDead)
+            {
+                CheckMustPatrol();
+                CheckKnockback();
+                if (timerAttack < 3)
+                    timerAttack += Time.deltaTime * attackColdown;
+                OnTriggerEnter2D(AttackCollider);
                 //mustPatrol = true;
                 if (mustPatrol)
                 {
                     Patrol();
-                }          
+                }
+            }
+                   
         }
 
         private void FixedUpdate()
@@ -75,7 +89,7 @@ namespace Enemy {
                 Flip();
             }
             animator.SetInteger("AnimState", 2);
-            rb.velocity = new Vector2(walkSpeed * Time.fixedDeltaTime, rb.velocity.y);
+            rb.velocity = new Vector2(moveSpeed * Time.fixedDeltaTime, rb.velocity.y);
             float distance = Vector2.Distance(target.position, transform.position);
             Vector2 directionToTarget = transform.position - target.position;
             float angle = Vector2.Angle(transform.forward, directionToTarget);
@@ -88,13 +102,13 @@ namespace Enemy {
         {
             mustPatrol = false;
             transform.localScale = new Vector2(transform.localScale.x * -1, transform.localScale.y);
-            walkSpeed *= -1;
+            moveSpeed *= -1;
             mustPatrol = true;
         }
 
         private void OnTriggerEnter2D(Collider2D attackCollider)
         {
-            if (attackCollider.transform.tag == "Player" )
+            if (attackCollider.transform.tag == "Player" && !isDead)
             {
                 mustPatrol = false;
                 if (timerAttack >1f) 
@@ -107,6 +121,64 @@ namespace Enemy {
                 }
                 mustPatrol = true;
             }
-        }        
+        } 
+        private void Damage(int damageValue)
+        {
+            currentHealth -= damageValue;
+            playerFacingDirection = playerController.GetFacingDirrection();
+            animator.SetTrigger("Hurt");
+            if (playerFacingDirection > 0)
+            {
+                playerOnLeft = true;
+            }
+            else
+            {
+                playerOnLeft = false;
+            }
+            if(applyKnockback && currentHealth > 0)
+            {
+                Knockback();
+            }
+            if(currentHealth <= 0)
+            {
+                Die();
+            }
+        }
+        private void Knockback()
+        {
+            knockback = true;            
+            mustPatrol = false;
+            knockbackStart = Time.time;
+            rb.velocity = new Vector2(knockbackSpeedX * playerFacingDirection, knockbackSpeedY);
+        }
+        private void CheckKnockback()
+        {
+            if(knockback && Time.time >= knockbackStart + knockbackDuration)
+            {
+                mustPatrol = true;
+                knockback = false;
+                rb.velocity = new Vector2(0.0f, rb.velocity.y);
+            }
+        }
+        private void CheckMustPatrol()
+        {
+            if (!knockback && !isAttack)
+                mustPatrol = true;
+        }
+        private void Die()
+        {
+            isDead = true;
+            mustPatrol = false;
+            animator.SetTrigger("Death");
+            DisableBearColliders();
+        }
+        public void DisableBearColliders()
+        {
+            foreach (Collider2D c in GetComponentsInChildren<Collider2D>())
+            {
+                c.enabled = false;  
+            }
+        }
+
     }
 }
