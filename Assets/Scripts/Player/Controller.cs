@@ -44,6 +44,7 @@ public class Controller : MonoBehaviour
     public bool isGrounded;   // is on Ground
     private bool canMove;
     private bool isDashing;
+    private bool isFacingRight = true;
 
     void checkingGround()
     {
@@ -74,6 +75,7 @@ public class Controller : MonoBehaviour
         {         
             ApplyMovement();
             AnimationsControl();
+            CheckMovementDirection();
             //Die
             if (stats.health <= 0)
             {
@@ -161,14 +163,14 @@ public class Controller : MonoBehaviour
         }
 
 
-        if (movementDirection > 0)
+       /* if (movementDirection > 0)
         {
-            GetComponent<SpriteRenderer>().flipX = false;
+            GetComponent<SpriteRenderer>().flipX = false;           
         }
         else if (movementDirection < 0)
-        {
+        {           
             GetComponent<SpriteRenderer>().flipX = true;
-        }
+        }*/
     }
 
     #endregion
@@ -196,6 +198,7 @@ public class Controller : MonoBehaviour
         isGrounded = false;
     }
     #endregion
+    
     #region Checkers
     private void CheckCanJump()
     {
@@ -231,8 +234,21 @@ public class Controller : MonoBehaviour
             }
         }
     }
+    private void CheckMovementDirection()
+    {
+        if(isFacingRight && movementDirection < 0)
+        {
+            Flip();
+        }
+        else if(!isFacingRight && movementDirection > 0)
+        {
+            Flip();
+        }
+    }
     #endregion
-    #region Attack
-
-    #endregion
+    private void Flip()
+    {
+        isFacingRight = !isFacingRight;
+        gameObject.transform.Rotate(0.0f,180.0f, 0.0f);
+    }
 }
