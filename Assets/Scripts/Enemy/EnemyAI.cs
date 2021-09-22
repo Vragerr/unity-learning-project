@@ -160,24 +160,19 @@ namespace Enemy {
                 rb.velocity = new Vector2(0.0f, rb.velocity.y);
             }
         }
+
         private void CheckMustPatrol()
         {
             if (!knockback && !isAttack)
                 mustPatrol = true;
         }
+
         private void Die()
         {
             isDead = true;
             mustPatrol = false;
             animator.SetTrigger("Death");
-            DisableBearColliders();
-        }
-        public void DisableBearColliders()
-        {
-            foreach (Collider2D c in GetComponentsInChildren<Collider2D>())
-            {
-                c.enabled = false;  
-            }
+            gameObject.layer = 12;
         }
 
     }
