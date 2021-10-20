@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerCombatController : MonoBehaviour
@@ -81,11 +82,11 @@ public class PlayerCombatController : MonoBehaviour
         }
     }
     private void CheckAttackHitBox()
-    {
+    {   
        Collider2D[] detectedObjects = Physics2D.OverlapCircleAll(attackHitBoxPos.position,attackRadius,damageableLayers);
         foreach (Collider2D collider in detectedObjects)
         {
-            collider.transform.SendMessage("Damage",attackDamage);
+            collider.transform.SendMessage("Damage", attackDamage);    
         }
     }
     private void FinishAttack()
